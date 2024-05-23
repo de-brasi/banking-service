@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 @Table(name = "clients")
 public class Client {
     @Id
+    @Column(name = "client_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long clientId;
 
