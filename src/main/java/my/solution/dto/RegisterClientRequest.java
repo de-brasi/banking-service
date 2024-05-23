@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import my.solution.dto.validators.PhoneOrEmailMustBeProvided;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Data
@@ -20,6 +21,9 @@ public class RegisterClientRequest {
 
     @NotBlank(message = "The password is required.")
     String password;    // todo: по-моему так не стоит делать
+
+    @JsonProperty("initial_deposit")
+    BigDecimal initialDeposit = BigDecimal.ZERO;
 
     @NotBlank(message = "The first name is required.")
     @JsonProperty("first_name")
