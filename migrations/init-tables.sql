@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS clients
     account       BIGINT UNIQUE NOT NULL,
     phone_number  TEXT UNIQUE,
     email_address TEXT UNIQUE,
-    birth_date    DATE          NOT NULL,
+    birth_date    TIMESTAMP     NOT NULL,
     first_name    TEXT          NOT NULL,
     last_name     TEXT          NOT NULL,
     patronymic    TEXT,
