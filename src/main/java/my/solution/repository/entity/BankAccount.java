@@ -1,4 +1,4 @@
-package my.solution.entity;
+package my.solution.repository.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
