@@ -53,7 +53,7 @@ public class ClientController {
     public ResponseEntity<?> transferMoney(
             @PathVariable String clientLogin,
             @RequestHeader("Receiver-Login") String receiverLogin,
-            @RequestHeader("Receiver-Login") BigDecimal amount) {
+            @RequestHeader("Amount") BigDecimal amount) {
         log.info("Transfer money. From={} to={}.", clientLogin, receiverLogin);
         clientService.transferMoney(clientLogin, receiverLogin, amount);
         return new ResponseEntity<>(HttpStatus.OK);
