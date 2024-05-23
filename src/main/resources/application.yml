@@ -1,6 +1,23 @@
 server:
   port: 8080
 
+spring:
+  liquibase:
+    enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bank_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        connection:
+          driver_class: org.postgresql.Driver
+        hbm2ddl:
+          auto: validate
+
 logging:
   config: classpath:log4j2-plain.xml
 
