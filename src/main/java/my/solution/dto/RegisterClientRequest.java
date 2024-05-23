@@ -37,4 +37,18 @@ public class RegisterClientRequest {
     @NotNull(message = "The birth date is required.")
     @JsonProperty("birth_date")
     OffsetDateTime birthDate;
+
+    @Override
+    public String toString() {
+        return "RegisterClientRequest{" +
+                "login='" + login + '\'' +
+                ", password='" + (password != null ? "*".repeat(password.length()) : null) + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", patronymic='" + patronymic + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", birthDate=" + birthDate +
+                '}';
+    }
 }
