@@ -6,6 +6,7 @@ import my.solution.api.exceptions.LastContactRemoveException;
 import my.solution.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -18,6 +19,21 @@ public class ExceptionController {
         final var httpResponseCode = HttpStatus.BAD_REQUEST;
         final var apiErrorResponse = new ApiErrorResponse(
                 "Trying to delete last significant client's contact.",
+                String.valueOf(httpResponseCode.value()),
+                e.getClass().getCanonicalName(),
+                e.getMessage(),
+                Arrays.stream(e.getStackTrace())
+                        .map(StackTraceElement::toString)
+                        .toList()
+        );
+        return new ResponseEntity<>(apiErrorResponse, httpResponseCode);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> invalidRequestBodyException(Exception e) {
+        final var httpResponseCode = HttpStatus.BAD_REQUEST;
+        final var apiErrorResponse = new ApiErrorResponse(
+                "Validation of request body failed.",
                 String.valueOf(httpResponseCode.value()),
                 e.getClass().getCanonicalName(),
                 e.getMessage(),
