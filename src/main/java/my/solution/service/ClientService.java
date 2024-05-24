@@ -205,7 +205,9 @@ public class ClientService {
         );
     }
 
-    private static void sort(SearchClientsRequest restrictionsInfo, ArrayList<ClientDTO> searchResult, Comparator<ClientDTO> comparing) {
+    private static void sort(SearchClientsRequest restrictionsInfo,
+                             ArrayList<ClientDTO> searchResult,
+                             Comparator<ClientDTO> comparing) {
         if (restrictionsInfo.isSorted()) {
             if (restrictionsInfo.getSortingOrder().equals("asc")) {
                 searchResult.sort(comparing);
