@@ -27,7 +27,7 @@ public class BankAccountService {
                     .multiply(BigDecimal.valueOf(1L + percent / 100))
                     .setScale(2, RoundingMode.HALF_EVEN);
             account.setDeposit(updatedAmount.min(maxPossibleAmount));
-            accountRepository.save(account);
+            accountRepository.saveWithSerializable(account);
             updatedDeposits += 1;
         }
 
