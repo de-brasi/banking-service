@@ -6,10 +6,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import my.solution.api.exceptions.ClientNotExistsException;
-import my.solution.api.exceptions.LastContactRemoveException;
-import my.solution.api.exceptions.NotEnoughMoneyException;
-import my.solution.api.exceptions.ValueAlreadyExistsException;
+import my.solution.api.exceptions.*;
 import my.solution.dto.ClientDTO;
 import my.solution.dto.RegisterClientRequest;
 import my.solution.dto.SearchClientsRequest;
@@ -161,11 +158,15 @@ public class ClientService {
     }
 
     @Transactional
-    public void transferMoney(String fromClientLogin, String toClientLogin, BigDecimal amount) {
+    public void transferMoney(String fromClientLogin, String clientPassword, String toClientLogin, BigDecimal amount) {
         var fromClientWrapper = clientRepository.findClientByLogin(fromClientLogin);
         var toClientWrapper = clientRepository.findClientByLogin(toClientLogin);
         var fromClient = fromClientWrapper.orElseThrow(ClientNotExistsException::new);
         var toClient = toClientWrapper.orElseThrow(ClientNotExistsException::new);
+
+        if (!fromClient.getPassword().equals(clientPassword)) {
+            throw new InvalidPasswordException();
+        }
 
         if (fromClient.getAccount().getDeposit().compareTo(amount) < 0) {
             throw new NotEnoughMoneyException();
