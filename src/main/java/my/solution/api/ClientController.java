@@ -52,10 +52,11 @@ public class ClientController {
     @PatchMapping(value = "/{clientLogin}/transfer-money")
     public ResponseEntity<?> transferMoney(
             @PathVariable String clientLogin,
+            @RequestHeader("Password") String clientPassword,
             @RequestHeader("Receiver-Login") String receiverLogin,
             @RequestHeader("Amount") BigDecimal amount) {
         log.info("Transfer money. From={} to={}.", clientLogin, receiverLogin);
-        clientService.transferMoney(clientLogin, receiverLogin, amount);
+        clientService.transferMoney(clientLogin, clientPassword, receiverLogin, amount);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
