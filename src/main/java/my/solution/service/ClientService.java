@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.solution.api.exceptions.*;
@@ -15,8 +16,10 @@ import my.solution.repository.ClientRepository;
 import my.solution.repository.entity.BankAccount;
 import my.solution.repository.entity.Client;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -32,7 +35,7 @@ public class ClientService {
         BankAccount accountEntity = new BankAccount();
         accountEntity.setDeposit(clientInfo.getInitialDeposit());
 
-        bankAccountRepository.save(accountEntity);
+        bankAccountRepository.saveWithSerializable(accountEntity);
 
         Client client = getClient(clientInfo, accountEntity);
 
@@ -157,7 +160,7 @@ public class ClientService {
         };
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void transferMoney(String fromClientLogin, String clientPassword, String toClientLogin, BigDecimal amount) {
         var fromClientWrapper = clientRepository.findClientByLogin(fromClientLogin);
         var toClientWrapper = clientRepository.findClientByLogin(toClientLogin);
@@ -172,12 +175,23 @@ public class ClientService {
             throw new NotEnoughMoneyException();
         }
 
-        fromClient.getAccount().setDeposit(
-                fromClient.getAccount().getDeposit().subtract(amount)
-        );
-        toClient.getAccount().setDeposit(
-                toClient.getAccount().getDeposit().add(amount)
-        );
+        try {
+            fromClient.getAccount().setDeposit(
+                    fromClient.getAccount().getDeposit().subtract(amount)
+            );
+            toClient.getAccount().setDeposit(
+                    toClient.getAccount().getDeposit().add(amount)
+            );
+
+            clientRepository.save(fromClient);
+            clientRepository.save(toClient);
+        } catch (CannotAcquireLockException e) {
+            log.error("Cant acquire lock");
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected exception {}", e.getClass().getCanonicalName());
+            throw e;
+        }
     }
 
     private static @NotNull Client getClient(RegisterClientRequest clientInfo, BankAccount accountEntity) {
