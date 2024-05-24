@@ -57,6 +57,21 @@ public class ExceptionController {
         return new ResponseEntity<>(apiErrorResponse, httpResponseCode);
     }
 
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ApiErrorResponse> wrongPasswordException(Exception e) {
+        final var httpResponseCode = HttpStatus.BAD_REQUEST;
+        final var apiErrorResponse = new ApiErrorResponse(
+                "Invalid password!",
+                String.valueOf(httpResponseCode.value()),
+                e.getClass().getCanonicalName(),
+                e.getMessage(),
+                Arrays.stream(e.getStackTrace())
+                        .map(StackTraceElement::toString)
+                        .toList()
+        );
+        return new ResponseEntity<>(apiErrorResponse, httpResponseCode);
+    }
+
     @ExceptionHandler(NotEnoughMoneyException.class)
     public ResponseEntity<ApiErrorResponse> notEnoughMoneyException(Exception e) {
         final var httpResponseCode = HttpStatus.BAD_REQUEST;
