@@ -20,4 +20,7 @@ public class BankAccount {
 
     @Column(nullable = false)
     BigDecimal deposit = BigDecimal.ZERO;
+
+    @Column(nullable = false, name = "max_deposit")
+    BigDecimal maxDeposit = BigDecimal.ZERO;
 }
