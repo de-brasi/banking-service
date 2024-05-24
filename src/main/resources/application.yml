@@ -1,6 +1,7 @@
-deposit-growth-strategy:
-  interval: 1m
-  percent: 5
+bank-service:
+  deposit-growth-strategy:
+    interval: 60s
+    percent: 5
 
 server:
   port: 8080
