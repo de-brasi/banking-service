@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,6 +18,18 @@ public class SearchClientsRequest {
             message = "Role must be either birth_date, phone_number, email_address or full_name")
     @JsonProperty("field")
     String fieldName;
+
+    @JsonProperty("date_value")
+    OffsetDateTime pivotDate;
+
+    @JsonProperty("phone_value")
+    String phoneSample;
+
+    @JsonProperty("full_name_value")
+    String fullNameSample;
+
+    @JsonProperty("email_value")
+    String emailSample;
 
     @JsonProperty("limit")
     Integer responseLimit = 1;
