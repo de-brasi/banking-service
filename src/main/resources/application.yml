@@ -1,3 +1,7 @@
+deposit-growth-strategy:
+  interval: 1m
+  percent: 5
+
 server:
   port: 8080
 
