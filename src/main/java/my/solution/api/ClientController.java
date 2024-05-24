@@ -3,8 +3,10 @@ package my.solution.api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.solution.service.ClientService;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -49,6 +51,7 @@ public class ClientController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Retryable(retryFor = CannotAcquireLockException.class, maxAttempts = 100)
     @PatchMapping(value = "/{clientLogin}/transfer-money")
     public ResponseEntity<?> transferMoney(
             @PathVariable String clientLogin,
