@@ -2,18 +2,21 @@ package my.solution.repository.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.List;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "clients")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-public class Client {
+@Builder
+public class Client implements UserDetails {
     @Id
     @Column(name = "client_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,5 +53,35 @@ public class Client {
     @AssertTrue(message = "Either phone or email must be provided.")
     public boolean isPhoneOrEmailProvided() {
         return phoneNumber != null || emailAddress != null;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getUsername() {
+        return getLogin();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
