@@ -22,14 +22,17 @@ public class ClientController {
     @PatchMapping(value = "/{clientLogin}/phone-number")
     public ResponseEntity<?> updatePhoneNumber(
             @PathVariable String clientLogin,
-            @RequestHeader("Phone-Number") String newPhoneNumber) {
+            @RequestHeader("Phone-Number") String newPhoneNumber,
+            @RequestHeader("Authorization") String jwtToken) {
         log.info("Request to update number. Client={}. New number={}", clientLogin, newPhoneNumber);
         clientService.updatePhoneNumberForClient(clientLogin, newPhoneNumber);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{clientLogin}/phone-number")
-    public ResponseEntity<?> deletePhoneNumber(@PathVariable String clientLogin) {
+    public ResponseEntity<?> deletePhoneNumber(
+            @PathVariable String clientLogin,
+            @RequestHeader("Authorization") String jwtToken) {
         log.info("Delete number. Client={}.", clientLogin);
         clientService.deletePhoneNumberForClient(clientLogin);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -38,14 +41,16 @@ public class ClientController {
     @PatchMapping(value = "/{clientLogin}/email")
     public ResponseEntity<?> updateEmail(
             @PathVariable String clientLogin,
-            @RequestHeader("Phone-Number") String newEmail) {
+            @RequestHeader("Phone-Number") String newEmail,
+            @RequestHeader("Authorization") String jwtToken) {
         log.info("Update email. Client={}. New email={}", clientLogin, newEmail);
         clientService.updateEmailForClient(clientLogin, newEmail);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{clientLogin}/email")
-    public ResponseEntity<?> deleteEmail(@PathVariable String clientLogin) {
+    public ResponseEntity<?> deleteEmail(@PathVariable String clientLogin,
+                                         @RequestHeader("Authorization") String jwtToken) {
         log.info("Delete email. Client={}.", clientLogin);
         clientService.deleteEmailForClient(clientLogin);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -57,7 +62,8 @@ public class ClientController {
             @PathVariable String clientLogin,
             @RequestHeader("Password") String clientPassword,
             @RequestHeader("Receiver-Login") String receiverLogin,
-            @RequestHeader("Amount") BigDecimal amount) {
+            @RequestHeader("Amount") BigDecimal amount,
+            @RequestHeader("Authorization") String jwtToken) {
         log.info("Transfer money. From={} to={}.", clientLogin, receiverLogin);
         clientService.transferMoney(clientLogin, clientPassword, receiverLogin, amount);
         return new ResponseEntity<>(HttpStatus.OK);
