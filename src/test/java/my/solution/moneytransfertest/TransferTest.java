@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import lombok.extern.slf4j.Slf4j;
+import my.solution.dto.JwtAuthenticationResponse;
 import my.solution.repository.ClientRepository;
 import my.solution.repository.entity.Client;
 import my.solution.service.DepositService;
@@ -13,8 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -88,17 +90,20 @@ public class TransferTest extends IntegrationTest {
                 """;
 
         // register clients
-        var firstRegistrationResult = registerClient(ADMIN, loginInfoClient1);
-        var secondRegistrationResult = registerClient(ADMIN, loginInfoClient2);
+        final var firstRegistrationResult = registerClient(ADMIN, loginInfoClient1);
+        final var secondRegistrationResult = registerClient(ADMIN, loginInfoClient2);
 
-        assertThat(firstRegistrationResult).isEqualTo(HttpStatus.OK);
-        assertThat(secondRegistrationResult).isEqualTo(HttpStatus.OK);
+        assertThat(firstRegistrationResult.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(secondRegistrationResult.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        final String firstClientJwtToken = firstRegistrationResult.getBody().getJwtToken();
 
         // transfer
         var transferResult = client1.patch()
                 .uri("/client/firstClient/transfer-money")
                 .header("Receiver-Login", "secondClient")
                 .header("Password", "firstClientPassword")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer %s".formatted(firstClientJwtToken))
                 .header("Amount", "100")
                 .retrieve()
                 .toBodilessEntity()
@@ -152,20 +157,24 @@ public class TransferTest extends IntegrationTest {
                 """;
 
         // register clients
-        var sender1RegistrationResult = registerClient(ADMIN, loginInfoClient);
-        var luckyOneRegistrationResult = registerClient(ADMIN, receiver);
+        final var sender1RegistrationResult = registerClient(ADMIN, loginInfoClient);
+        final var luckyOneRegistrationResult = registerClient(ADMIN, receiver);
 
+        assertThat(sender1RegistrationResult.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(luckyOneRegistrationResult.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        assertThat(sender1RegistrationResult).isEqualTo(HttpStatus.OK);
-        assertThat(luckyOneRegistrationResult).isEqualTo(HttpStatus.OK);
+        final String sender1JwtToken = sender1RegistrationResult.getBody().getJwtToken();
+        final String luckyOneJwtToken = luckyOneRegistrationResult.getBody().getJwtToken();
 
         // concurrent transfer
         var worker1 = new Thread(new TransferRoutine(
                 sender, 1, 50,
-                "sender1", "sender1", "receiver"));
+                "sender1", "sender1", "receiver",
+                sender1JwtToken));
         var worker2 = new Thread(new TransferRoutine(
                 sender, 1, 50,
-                "sender1", "sender1", "receiver"));
+                "sender1", "sender1", "receiver",
+                luckyOneJwtToken));
 
         worker1.start();
         worker2.start();
@@ -239,22 +248,27 @@ public class TransferTest extends IntegrationTest {
                 """;
 
         // register clients
-        var sender1RegistrationResult = registerClient(ADMIN, loginInfoClient1);
-        var sender2RegistrationResult = registerClient(ADMIN, loginInfoClient2);
-        var luckyOneRegistrationResult = registerClient(ADMIN, luckyOneInfo);
+        final var sender1RegistrationResult = registerClient(ADMIN, loginInfoClient1);
+        final var sender2RegistrationResult = registerClient(ADMIN, loginInfoClient2);
+        final var luckyOneRegistrationResult = registerClient(ADMIN, luckyOneInfo);
 
+        assertThat(sender1RegistrationResult.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sender2RegistrationResult.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(luckyOneRegistrationResult.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        assertThat(sender1RegistrationResult).isEqualTo(HttpStatus.OK);
-        assertThat(sender2RegistrationResult).isEqualTo(HttpStatus.OK);
-        assertThat(luckyOneRegistrationResult).isEqualTo(HttpStatus.OK);
+        final String sender1JwtToken = sender1RegistrationResult.getBody().getJwtToken();
+        final String sender2JwtToken = sender2RegistrationResult.getBody().getJwtToken();
+        final String luckyOneJwtToken = luckyOneRegistrationResult.getBody().getJwtToken();
 
         // concurrent transfer
         var worker1 = new Thread(new TransferRoutine(
                 sender1, 1, 100,
-                "sender111", "sender111", "receiver1"));
+                "sender111", "sender111", "receiver1",
+                sender1JwtToken));
         var worker2 = new Thread(new TransferRoutine(
                 sender2, 1, 100,
-                "sender222", "sender222", "receiver1"));
+                "sender222", "sender222", "receiver1",
+                sender2JwtToken));
 
         worker1.start();
         worker2.start();
@@ -282,7 +296,8 @@ public class TransferTest extends IntegrationTest {
     private record TransferRoutine(RestClient sender, int amount, int iterationCount,
                                    String senderLogin,
                                    String senderPassword,
-                                   String receiverLogin) implements Runnable {
+                                   String receiverLogin,
+                                   String jwtToken) implements Runnable {
         @Override
         public void run() {
             int success = 0;
@@ -292,6 +307,7 @@ public class TransferTest extends IntegrationTest {
                         .header("Receiver-Login", receiverLogin())
                         .header("Password", senderPassword())
                         .header("Amount", String.valueOf(amount))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer %s".formatted(jwtToken))
                         .retrieve()
                         .toBodilessEntity()
                         .getStatusCode();
@@ -303,15 +319,14 @@ public class TransferTest extends IntegrationTest {
         }
     }
 
-    private static HttpStatusCode registerClient(RestClient register, String body) {
+    private static ResponseEntity<JwtAuthenticationResponse> registerClient(RestClient register, String body) {
         return register
                 .post()
                 .uri("/api/admin/register")
                 .contentType(APPLICATION_JSON)
                 .body(body)
                 .retrieve()
-                .toBodilessEntity()
-                .getStatusCode();
+                .toEntity(JwtAuthenticationResponse.class);
     }
 
 }
