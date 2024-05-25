@@ -4,20 +4,17 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.solution.api.exceptions.*;
 import my.solution.dto.ClientDTO;
-import my.solution.dto.RegisterClientRequest;
 import my.solution.dto.SearchClientsRequest;
-import my.solution.repository.BankAccountRepository;
 import my.solution.repository.ClientRepository;
-import my.solution.repository.entity.BankAccount;
 import my.solution.repository.entity.Client;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,25 +25,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClientService {
 
     private final ClientRepository clientRepository;
-    private final BankAccountRepository bankAccountRepository;
 
     @Transactional
-    public void addNewClient(RegisterClientRequest clientInfo) {
-        BankAccount accountEntity = new BankAccount();
-        accountEntity.setDeposit(clientInfo.getInitialDeposit());
-
-        bankAccountRepository.saveWithSerializable(accountEntity);
-
-        Client client = getClient(clientInfo, accountEntity);
-
+    public void addNewClient(Client client) {
         try {
             clientRepository.save(client);
         } catch (DataIntegrityViolationException e) {
-            log.warn("DataIntegrityViolationException when try to save entity {}", clientInfo);
+            log.warn("DataIntegrityViolationException when try to save entity {}", client);
             throw new ValueAlreadyExistsException(e.getMostSpecificCause());
         }
+        log.info("Registered client: {}", client);
+    }
 
-        log.info("Registered client: {}", clientInfo);
+    @Transactional
+    public Client getByLogin(String login) {
+        return clientRepository.findClientByLogin(login).orElseThrow(ClientNotExistsException::new);
+    }
+
+    public UserDetailsService userDetailsService() {
+        return this::getByLogin;
     }
 
     @Transactional
@@ -192,20 +189,6 @@ public class ClientService {
             log.error("Unexpected exception {}", e.getClass().getCanonicalName());
             throw e;
         }
-    }
-
-    private static @NotNull Client getClient(RegisterClientRequest clientInfo, BankAccount accountEntity) {
-        Client client = new Client();
-        client.setLogin(clientInfo.getLogin());
-        client.setPassword(clientInfo.getPassword());
-        client.setAccount(accountEntity);
-        client.setFirstName(clientInfo.getFirstName());
-        client.setLastName(clientInfo.getLastName());
-        client.setPatronymic(clientInfo.getPatronymic());
-        client.setPhoneNumber(clientInfo.getPhone());
-        client.setEmailAddress(clientInfo.getEmail());
-        client.setBirthDate(clientInfo.getBirthDate());
-        return client;
     }
 
     private static @NotNull ClientDTO getClientDto(Client source) {
