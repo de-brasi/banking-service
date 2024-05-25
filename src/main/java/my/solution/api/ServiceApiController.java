@@ -2,8 +2,10 @@ package my.solution.api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import my.solution.dto.JwtAuthenticationResponse;
 import my.solution.dto.RegisterClientRequest;
 import my.solution.dto.SearchClientsRequest;
+import my.solution.service.AuthService;
 import my.solution.service.ClientService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +19,13 @@ import org.springframework.web.bind.annotation.*;
 public class ServiceApiController {
 
     private final ClientService clientService;
+    private final AuthService authService;
 
     @PostMapping(value = "/register")
-    public ResponseEntity<?> handleRegistration(@Validated @RequestBody RegisterClientRequest requestBody) {
-        log.info("Got request body: {}", requestBody);
-        clientService.addNewClient(requestBody);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<JwtAuthenticationResponse> handleRegistration(@Validated @RequestBody RegisterClientRequest requestBody) {
+        log.info("Register client: {}", requestBody);
+        var signUpResult = authService.signUp(requestBody);
+        return new ResponseEntity<>(signUpResult, HttpStatus.OK);
     }
 
     @GetMapping(value = "/search")
