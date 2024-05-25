@@ -19,12 +19,6 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    /**
-     * Регистрация пользователя
-     *
-     * @param request данные пользователя
-     * @return токен
-     */
     public JwtAuthenticationResponse signUp(RegisterClientRequest request) {
         BankAccount accountEntity = new BankAccount();
         accountEntity.setDeposit(request.getInitialDeposit());
@@ -48,12 +42,6 @@ public class AuthService {
         return new JwtAuthenticationResponse(jwt);
     }
 
-    /**
-     * Аутентификация пользователя
-     *
-     * @param request данные пользователя
-     * @return токен
-     */
     public JwtAuthenticationResponse signIn(ClientSignInRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.getLogin(),
