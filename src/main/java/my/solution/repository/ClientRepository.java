@@ -24,8 +24,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Collection<Client> findAllByEmailAddressEquals(String sample);
 
     @Transactional(readOnly = true)
-    @Query("SELECT client FROM Client client " +
-            "WHERE CONCAT(client.firstName, ' ', client.lastName, ' ', client.patronymic) " +
-            "LIKE ?1%")
+    @Query("SELECT client FROM Client client "
+            + "WHERE CONCAT(client.firstName, ' ', client.lastName, ' ', client.patronymic) "
+            + "LIKE ?1%")
     Collection<Client> findAllByFullNameLike(String sample);
 }

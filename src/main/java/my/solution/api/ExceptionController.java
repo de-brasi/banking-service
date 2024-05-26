@@ -1,14 +1,18 @@
 package my.solution.api;
 
-import my.solution.api.exceptions.*;
+import java.util.Arrays;
+import my.solution.api.exceptions.ClientNotExistsException;
+import my.solution.api.exceptions.InsufficientFundsException;
+import my.solution.api.exceptions.InvalidPasswordException;
+import my.solution.api.exceptions.LastContactRemoveException;
+import my.solution.api.exceptions.NotEnoughMoneyException;
+import my.solution.api.exceptions.ValueAlreadyExistsException;
 import my.solution.dto.ApiErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.Arrays;
 
 @RestControllerAdvice
 public class ExceptionController {

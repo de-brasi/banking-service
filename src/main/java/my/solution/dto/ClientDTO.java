@@ -1,9 +1,9 @@
 package my.solution.dto;
 
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor

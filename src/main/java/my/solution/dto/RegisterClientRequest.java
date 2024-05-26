@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import my.solution.dto.validators.PhoneOrEmailMustBeProvided;
-
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -56,15 +55,15 @@ public class RegisterClientRequest {
 
     @Override
     public String toString() {
-        return "RegisterClientRequest{" +
-                "login='" + login + '\'' +
-                ", password='" + (password != null ? "*".repeat(password.length()) : null) + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", patronymic='" + patronymic + '\'' +
-                ", phone='" + phone + '\'' +
-                ", email='" + email + '\'' +
-                ", birthDate=" + birthDate +
-                '}';
+        return "RegisterClientRequest{"
+                + "login='" + login + '\''
+                + ", password='" + (password != null ? "*".repeat(password.length()) : null) + '\''
+                + ", firstName='" + firstName + '\''
+                + ", lastName='" + lastName + '\''
+                + ", patronymic='" + patronymic + '\''
+                + ", phone='" + phone + '\''
+                + ", email='" + email + '\''
+                + ", birthDate=" + birthDate
+                + '}';
     }
 }

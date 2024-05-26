@@ -10,7 +10,11 @@ import my.solution.service.ClientService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/api/admin")
@@ -22,7 +26,8 @@ public class ServiceApiController {
     private final AuthService authService;
 
     @PostMapping(value = "/register")
-    public ResponseEntity<JwtAuthenticationResponse> handleRegistration(@Validated @RequestBody RegisterClientRequest requestBody) {
+    public ResponseEntity<JwtAuthenticationResponse> handleRegistration(
+            @Validated @RequestBody RegisterClientRequest requestBody) {
         log.info("Register client: {}", requestBody);
         var signUpResult = authService.signUp(requestBody);
         return new ResponseEntity<>(signUpResult, HttpStatus.OK);

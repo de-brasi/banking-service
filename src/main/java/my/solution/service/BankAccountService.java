@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("MagicNumber")
 public class BankAccountService {
 
     private final BankAccountRepository accountRepository;
